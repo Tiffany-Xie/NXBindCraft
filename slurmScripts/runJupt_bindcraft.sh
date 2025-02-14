@@ -7,16 +7,17 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem 42gb
 #SBATCH --time 24:00:00
-#SBATCH --job-name=run_jupyter_notebook 
-#SBATCH --output=/hpf/projects/mtyers/ningrui/BindCraft/myscripts/Logs/jupyter_%j.out
+#SBATCH --job-name=run_juptNote
+#SBATCH --output=/hpf/projects/mtyers/ningrui/NXBindCraft/Logs/jupLogs/jupyter_%j.out
 
-# Load module
+
+# Load module (not necessary if using local bindcraft env)
 echo "Loading BindCraft module..."
 module load BindCraft/
 
 # Initialise environment and modules
-CONDA_BASE=$(conda info --base)
-source ${CONDA_BASE}/bin/activate ${CONDA_BASE}/envs/BindCraft
+CONDA_BASE=/hpf/tools/alma8/anaconda/24.9.2
+source ${CONDA_BASE}/bin/activate ${CONDA_BASE}/envs/BindCraft # BindCraft
 export LD_LIBRARY_PATH=${CONDA_BASE}/lib
 
 echo "Python in use:"
