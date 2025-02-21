@@ -12,12 +12,12 @@
 
 
 # Load module (not necessary if using local bindcraft env)
-echo "Loading BindCraft module..."
-module load BindCraft/
+#echo "Loading BindCraft module..."
+#module load BindCraft/
 
 # Initialise environment and modules
-CONDA_BASE=/hpf/tools/alma8/anaconda/24.9.2
-source ${CONDA_BASE}/bin/activate ${CONDA_BASE}/envs/BindCraft # BindCraft
+CONDA_BASE=/hpf/projects/mtyers/ningrui/miniconda3
+source ${CONDA_BASE}/bin/activate BindCraft # ${CONDA_BASE}/envs/BindCraft
 export LD_LIBRARY_PATH=${CONDA_BASE}/lib
 
 echo "Python in use:"
