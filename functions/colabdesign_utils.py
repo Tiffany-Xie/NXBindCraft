@@ -154,8 +154,8 @@ def binder_hallucination(design_name, starting_pdb, chain, target_hotspot_residu
                     if advanced_settings["greedy_iterations"] > 0:
                         print("Stage 4: PSSM Semigreedy Optimisation")
                         af_model.clear_best()
-                        af_model.design_pssm_semigreedy(soft_iters=0, hard_iters=advanced_settings["greedy_iterations"], tries=greedy_tries, models=design_models, 
-                                                        num_models=1, sample_models=advanced_settings["sample_models"], ramp_models=False, save_best=True)
+                        af_model.design_pssm_semigreedy(soft_iters=0, hard_iters=advanced_settings["greedy_iterations"], tries=greedy_tries, models=design_models, seq_logits=af_model.aux["seq"]["logits"],
+                                                        num_models=1, sample_models=advanced_settings["sample_models"], ramp_models=False, save_best=True) ### add some changes from Evan D.
 
                 else:
                     update_failures(failure_csv, 'Trajectory_one-hot_pLDDT')
