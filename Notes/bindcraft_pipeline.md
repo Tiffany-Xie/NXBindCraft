@@ -1,5 +1,6 @@
 ## BindCraft Pipeline
 
+'''
 seed, length, helicity value
 trajectory (binder hallucination)
     initialize binder hallucination model
@@ -80,6 +81,7 @@ if terminate = ''
             compile complex prediction model ('binder', #recycle, afparams, x multimrValid,...)
             if use initial guess
                 prepare input (trap pdb, 'A', 'B', binderlen, useBinderTemplate, rm target template for repred, rm sidechain from target for repred...)
+                # Why need binder length if this is pure prediction ???
             else
                 prepare input (starting pdb, 'B', binderlen, rm target template for repred, rm sidechain from target for repred)
             compile binder monomer prediction model ('hallucination', #recycles, af params, x multimrValid,...)
@@ -139,7 +141,7 @@ if terminate = ''
     analyse the rejetion rate of traj
     if acceptance < acceptance rate: break
 trajectory + 1
-
+'''
 ### Yeah the end!!!
 
                     

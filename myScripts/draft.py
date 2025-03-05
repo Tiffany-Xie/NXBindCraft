@@ -18,3 +18,7 @@ math.ceil(2.3)
 
 human1.hair="black"
 human1.hair
+
+seq = "abcd_efg"
+seq.split('_')
+seq
