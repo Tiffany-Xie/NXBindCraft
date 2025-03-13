@@ -136,10 +136,10 @@ class SelectChain(Select):
         return PDB.is_aa(residue)
     
 
-def separate_complex(complex_pdb):
-    complex_name = complex_pdb.removesuffix('.pdb')
+def separate_complex(complex_name):
+    #complex_name = complex_pdb.removesuffix('.pdb')
     targets_path = '/hpf/projects/mtyers/ningrui/NXBindCraft/myTrials/testRefold/Targets'
-    complex_pdb_path = os.path.join(targets_path, complex_pdb)
+    complex_pdb_path = os.path.join(targets_path, complex_name+'.pdb')
 
     parser = PDB.PDBParser(QUIET=True)
     structure = parser.get_structure('complex', complex_pdb_path)
@@ -223,7 +223,6 @@ binder_prediction_model = mk_af_model(protocol='hallucination',
 # prepare input (binder only)
 binder_prediction_model.prep_inputs(length=len(binder_seq))
 
-
 ### predict
 '''
 HotspotRMSD -> unaligned RMSD of binder compared to original trajectory, in other words how far is binder in the repredicted complex from the original binding site
@@ -239,23 +238,22 @@ with open(filter_path, 'r') as file:
 complex_statistics, pass_af2_filters = predict_complex(prediction_model=complex_prediction_model,
                                                        binder_sequence=binder_seq, 
                                                        complex_name='5ZNG',
-                                                       prediction_models=[0,1,2,3,4],
+                                                       prediction_models=[0,1],
                                                        num_recycles_validation=num_recycles_validation,
-                                                       filters=filters,
-                                                       trial_name='testRefold')
+                                                       filters=filters)
 
 # if not pass af2 filters, noted in dataframe; but also do scoring
 # select the stats with highest plddt to continue scoring
 pass_af2_keys = [k for k, v in complex_statistics.items() if v['pass_af2_filters']]
 if pass_af2_keys:
-    best_pred_model = max(pass_af2_keys, key=lambda k: complex_statistics[k]['pLDDT'])
+    best_complex_pred_model = max(pass_af2_keys, key=lambda k: complex_statistics[k]['pLDDT'])
 else:
-    best_pred_model = max(complex_statistics, key=lambda k: complex_statistics[k]['pLDDT'])
+    best_complex_pred_model = max(complex_statistics, key=lambda k: complex_statistics[k]['pLDDT'])
 
 complex_name='5ZNG'
 gt_complex_pdb = os.path.join(main_folder, 'myTrials/testRefold/Targets', '5zng.pdb')
 # for model_num in prediction_models:
-complex_pdb = os.path.join(main_folder, 'myTrials', trial_name, 'refoldPDB/refold', f'{complex_name}_model{best_pred_model}.pdb')
+complex_pdb = os.path.join(main_folder, 'myTrials', trial_name, 'refoldPDB/refold', f'{complex_name}_model{best_complex_pred_model}.pdb')
 
 pr.init('-ignore_unrecognized_res -ignore_zero_occupancy -mute all -holes:dalphaball /hpf/projects/mtyers/ningrui/NXBindCraft/functions/DAlphaBall.gcc -corrections::beta_nov16 true -relax:default_repeats 1')
 
@@ -270,6 +268,7 @@ rmsd_site
 target_rmsd
 
 ### predict binder alone
+# NOTE: paper only used template based model [0,1], here used [0-4]
 binder_statistics = predict_binder(prediction_model=binder_prediction_model,
                                    binder_sequence=binder_seq,
                                    complex_name='5ZNG',
@@ -277,8 +276,8 @@ binder_statistics = predict_binder(prediction_model=binder_prediction_model,
                                    binder_chain=binder_chain,
                                    num_recycles_validation=num_recycles_validation,
                                    prediction_models=[0,1,2,3,4])
-best_pred_model = max(binder_statistics, key=lambda k: binder_statistics[k]['pLDDT'])
-binder_pdb = os.path.join(main_folder, "myTrials", trial_name, 'refoldPDB', 'refold_binder', f'{complex_name}_binder_model{best_pred_model}.pdb')
+best_binder_pred_model = max(binder_statistics, key=lambda k: binder_statistics[k]['pLDDT'])
+binder_pdb = os.path.join(main_folder, "myTrials", trial_name, 'refoldPDB', 'refold_binder', f'{complex_name}_binder_model{best_binder_pred_model}.pdb')
 if not os.path.exists(binder_pdb):
     print('Predicted binder alone structure not exists')
 else:
@@ -287,9 +286,17 @@ else:
 rmsd_binder
 
 # TODO: add another RMSD score to measure the difference between predicted complex binder and predicted binder alone
+complex_pdb # predicted
+binder_pdb # predicted
+# align binder-binder first -> get score -> align back?a
+align_pdbs(complex_pdb, binder_pdb, 'B', 'A')
+rmsd_pre_binder = unaligned_rmsd(complex_pdb, binder_pdb, 'B', 'A')
+rmsd_pre_binder
+align_pdbs(gt_complex_pdb, binder_pdb, binder_chain, 'A')
 
-#            HS Target Binder PassOrNot
-# complex_name
+
+
+
 # cn518
 
 
