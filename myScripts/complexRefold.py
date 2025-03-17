@@ -18,13 +18,11 @@ complex pdb -> extract shorter one seq as binder -> extract longer one pdb as ta
 '''
 
 ''' possible that fixing one structure during repredict limits realistic predictions (check)'''
-mk_af_model.save_pdb
 # ------------------------------------------------------------------- functions
-main_folder = '/hpf/projects/mtyers/ningrui/NXBindCraft'
-trial_name = 'testRefold'
+
 def predict_complex(prediction_model, binder_sequence, complex_name, prediction_models, num_recycles_validation, filters, trial_name='testRefold'): # --> adapted from predict_binder_complex
     prediction_stats = {}
-
+    main_folder = '/hpf/projects/mtyers/ningrui/NXBindCraft'
     # clean sequence
     binder_sequence = re.sub("[^A-Z]", "", binder_sequence.upper())
 
@@ -93,7 +91,7 @@ def predict_complex(prediction_model, binder_sequence, complex_name, prediction_
 
 def predict_binder(prediction_model, binder_sequence, complex_name, gt_pdb, binder_chain, num_recycles_validation, prediction_models, trial_name='testRefold'):
     binder_stats = {}
-
+    main_folder = '/hpf/projects/mtyers/ningrui/NXBindCraft'
     # prepare sequence for prediction
     binder_sequence = re.sub("[^A-Z]", "", binder_sequence.upper())
     prediction_model.set_seq(binder_sequence)
@@ -173,127 +171,15 @@ def separate_complex(complex_name):
 
 
 
-# ------------------------------------------------------------------- input
 
-target_seq = 'ETGASAKELACQEITVPLCKGIGYEYTYMPNQFNHDTQDEAGLEVHQFWPLVEIQCSPDLKFFLCSMYTPICLEDYKKPLPPCRSVCERAKAGCAPLMRQYGFAWPDRMRCDRLPEQGNPDTLCMDYERGTLEVLFQG'
-binder_seq = 'MKILSKEEIEKRIRELERRLHELMTKLQPIFRDLPEEDRNEIIHLSLMNNDVWWDYRRNWETMSNEELQEKLEQLEEILKRFEEIVEKH'
-
-params_path = '/hpf/projects/mtyers/ningrui//BindCraft'
-target_pdb = '/hpf/projects/mtyers/ningrui/BindCraft/Targets/FZD8.pdb'
-binder_csv = 'something'
 
 # ------------------------------------------------------------------- target pdb + binder seq
-num_recycles_validation = 3
-multimer_validation = False
-predicted_initial_guess = False
-predict_bigbang = False
-
-target_pdb, binder_seq, target_chain, binder_chain = separate_complex('5zng.pdb')
-
-rm_template_seq_predict = False
-rm_template_sc_predict = False
-
-
-### compile model + prep inputs
-# compile complex prediction model
-complex_prediction_model = mk_af_model(protocol = 'binder',
-                                       num_recycles = num_recycles_validation,
-                                       data_dir = params_path,
-                                       use_multimer = multimer_validation,
-                                       use_initial_guess = predicted_initial_guess,
-                                       use_initial_atom_pos = predict_bigbang)
-
-# prepare input (complex)
-complex_prediction_model.prep_inputs(pdb_filename=target_pdb, 
-                                     chain='A', 
-                                     binder_len=len(binder_seq),
-                                     rm_target_seq=rm_template_seq_predict, 
-                                     rm_target_sc=rm_template_sc_predict)
-
-
-# compile binder monomer prediction model
-binder_prediction_model = mk_af_model(protocol='hallucination',
-                                      use_templates = False,
-                                      initial_guess=False,
-                                      use_initial_atom_pos=False,
-                                      num_recycles=num_recycles_validation,
-                                      data_dir=params_path,
-                                      use_multimer=multimer_validation)
-
-# prepare input (binder only)
-binder_prediction_model.prep_inputs(length=len(binder_seq))
-
 ### predict
 '''
 HotspotRMSD -> unaligned RMSD of binder compared to original trajectory, in other words how far is binder in the repredicted complex from the original binding site
 Target_RMSD -> RMSD of target predicted in context of the designed binder compared to input PDB
 Binder_RMSD -> RMSD of binder predicted alone compared to original trajectory
 '''
-# complex predict
-import json
-filter_path = '/hpf/projects/mtyers/ningrui/NXBindCraft/settings_filters/default_filters.json'
-with open(filter_path, 'r') as file:
-    filters = json.load(file)
-
-complex_statistics, pass_af2_filters = predict_complex(prediction_model=complex_prediction_model,
-                                                       binder_sequence=binder_seq, 
-                                                       complex_name='5ZNG',
-                                                       prediction_models=[0,1],
-                                                       num_recycles_validation=num_recycles_validation,
-                                                       filters=filters)
-
-# if not pass af2 filters, noted in dataframe; but also do scoring
-# select the stats with highest plddt to continue scoring
-pass_af2_keys = [k for k, v in complex_statistics.items() if v['pass_af2_filters']]
-if pass_af2_keys:
-    best_complex_pred_model = max(pass_af2_keys, key=lambda k: complex_statistics[k]['pLDDT'])
-else:
-    best_complex_pred_model = max(complex_statistics, key=lambda k: complex_statistics[k]['pLDDT'])
-
-complex_name='5ZNG'
-gt_complex_pdb = os.path.join(main_folder, 'myTrials/testRefold/Targets', '5zng.pdb')
-# for model_num in prediction_models:
-complex_pdb = os.path.join(main_folder, 'myTrials', trial_name, 'refoldPDB/refold', f'{complex_name}_model{best_complex_pred_model}.pdb')
-
-pr.init('-ignore_unrecognized_res -ignore_zero_occupancy -mute all -holes:dalphaball /hpf/projects/mtyers/ningrui/NXBindCraft/functions/DAlphaBall.gcc -corrections::beta_nov16 true -relax:default_repeats 1')
-
-if not os.path.exists(complex_pdb):
-    print('Predicted complex structure not exists')
-else:
-    # unaligned RMSD to determine if binder is in the desinged binding site
-    rmsd_site = unaligned_rmsd(gt_complex_pdb, complex_pdb, binder_chain, 'B')
-    target_rmsd = target_pdb_rmsd(complex_pdb, target_pdb, target_chain)
-
-rmsd_site
-target_rmsd
-
-### predict binder alone
-# NOTE: paper only used template based model [0,1], here used [0-4]
-binder_statistics = predict_binder(prediction_model=binder_prediction_model,
-                                   binder_sequence=binder_seq,
-                                   complex_name='5ZNG',
-                                   gt_pdb=gt_complex_pdb,
-                                   binder_chain=binder_chain,
-                                   num_recycles_validation=num_recycles_validation,
-                                   prediction_models=[0,1,2,3,4])
-best_binder_pred_model = max(binder_statistics, key=lambda k: binder_statistics[k]['pLDDT'])
-binder_pdb = os.path.join(main_folder, "myTrials", trial_name, 'refoldPDB', 'refold_binder', f'{complex_name}_binder_model{best_binder_pred_model}.pdb')
-if not os.path.exists(binder_pdb):
-    print('Predicted binder alone structure not exists')
-else:
-    rmsd_binder = unaligned_rmsd(gt_complex_pdb, binder_pdb, binder_chain, 'A')
-
-rmsd_binder
-
-# TODO: add another RMSD score to measure the difference between predicted complex binder and predicted binder alone
-complex_pdb # predicted
-binder_pdb # predicted
-# align binder-binder first -> get score -> align back?a
-align_pdbs(complex_pdb, binder_pdb, 'B', 'A')
-rmsd_pre_binder = unaligned_rmsd(complex_pdb, binder_pdb, 'B', 'A')
-rmsd_pre_binder
-align_pdbs(gt_complex_pdb, binder_pdb, binder_chain, 'A')
-
 
 
 
@@ -304,10 +190,27 @@ align_pdbs(gt_complex_pdb, binder_pdb, binder_chain, 'A')
 
 # ------------------------------------------------------------------- draft
 
-import os
-os.path.realpath('/hpf/projects/mtyers/ningrui/NXBindCraft/myScripts/draft.py')
-os.getcwd()
+from DockQ.DockQ import load_PDB, run_on_all_native_interfaces
 
+#pred_complex_path = '/hpf/projects/mtyers/ningrui/NXBindCraft/myTrials/testRefold/refoldPDB/refold/6u08_model2.pdb'
+pred_complex_path = '/hpf/projects/mtyers/ningrui/NXBindCraft/myTrials/testRefold/Targets/6u08.pdb'
+gt_complex_path = '/hpf/projects/mtyers/ningrui/NXBindCraft/myTrials/testRefold/Targets/6u08.pdb'
+
+model = load_PDB(pred_complex_path)
+native = load_PDB(gt_complex_path)
+
+# native:model chain map dictionary for two interfaces
+chain_map = {"A":"A", "B":"B"}
+# returns a dictionary containing the results and the total DockQ score
+dockq_out = run_on_all_native_interfaces(model, native, chain_map=chain_map)
+dockq_out[-1]
+
+import pandas as pd
+df = pd.DataFrame(index=['a', 'b', 'c'])
+df['age'] = [1,2,3]
+d = {'a': 188, 'c': 676, 'b': 565}
+df['height'] = df.index.map(d)
+df
 # ------------------------------------------------------------------- target seq + binder seq
 
 # compile prediction model
