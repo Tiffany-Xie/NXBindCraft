@@ -2,12 +2,12 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --cpus-per-task 1
-#SBATCH --partition=gpu
+#SBATCH --partition=gen_gpu
 #SBATCH --qos=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --mem 42gb
 #SBATCH --time 72:00:00
-#SBATCH --output=bindcraft_%A.log
+#SBATCH --output=./Logs/designLogs/bindcraft_%A.log
 
 # Initialise environment and modules
 CONDA_BASE=$(conda info --base)
@@ -18,7 +18,8 @@ export LD_LIBRARY_PATH=${CONDA_BASE}/lib
 #source /path/to/mambaforge/bin/activate /path/to/mambaforge/envs/BindCraft
 
 # Get the directory where the bindcraft script is located
-SCRIPT_DIR=$(dirname "$0")
+#SCRIPT_DIR=$(dirname "$0")
+SCRIPT_DIR="/hpf/projects/mtyers/ningrui/NXBindCraft"
 
 # Parsing command line options
 SETTINGS=""
@@ -45,3 +46,10 @@ fi
 
 echo "Running the BindCraft pipeline"
 python -u "${SCRIPT_DIR}/bindcraft.py" --settings "${SETTINGS}" --filters "${FILTERS}" --advanced "${ADVANCED}"
+
+
+####### NX: move the log file to the design path
+LOG_PATH=$(python -c "import json; print(json.load(open('${SETTINGS}')).get('design_path', '.'))")
+
+JOB_ID=${SLURM_JOB_ID}
+mv "/hpf/projects/mtyers/ningrui/NXBindCraft/Logs/designLogs/bindcraft_${JOB_ID}.log" "${LOG_DIR}/bindcraft_${JOB_ID}.log"

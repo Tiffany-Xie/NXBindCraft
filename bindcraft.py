@@ -53,6 +53,18 @@ create_dataframe(mpnn_csv, design_labels)
 create_dataframe(final_csv, final_labels)
 generate_filter_pass_csv(failure_csv, args.filters)
 
+
+####### NX
+print('Target settings:')
+print(target_settings)
+print()
+print('Filter used:')
+print(os.path.basename(filters_path))
+print()
+print('Advanced setting used:')
+print(os.path.basename(advanced_path))
+####### NX
+
 ####################################
 ####################################
 ####################################

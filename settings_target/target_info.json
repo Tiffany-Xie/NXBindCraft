@@ -1,0 +1,9 @@
+{
+    "design_path": "/hpf/projects/mtyers/ningrui/designs_BC/designs/FZD/FZD8_nonconserved_HS2",
+    "binder_name": "FZD8_nc_hs2",
+    "starting_pdb": "/hpf/projects/mtyers/ningrui/designs_BC/targets/5un6.pdb",
+    "chains": "A",
+    "target_hotspot_residues": "6,7,25,74",
+    "lengths": [50, 100],
+    "number_of_final_designs": 20
+}
