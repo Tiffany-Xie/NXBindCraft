@@ -1,0 +1,9 @@
+{
+    "design_path": "/hpf/projects/mtyers/ningrui/designs_BC/designs/LRP6/LRP_E3E4",
+    "binder_name": "LRP_E3E4",
+    "starting_pdb": "/hpf/projects/mtyers/ningrui/designs_BC/targets/8dvl.pdb",
+    "chains": "A",
+    "target_hotspot_residues": "836, 792, 639, 850, 875, 877, 681, 767, 706, 708",
+    "lengths": [50, 100],
+    "number_of_final_designs": 100
+}

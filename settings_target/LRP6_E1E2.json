@@ -1,0 +1,9 @@
+{
+    "design_path": "/hpf/projects/mtyers/ningrui/designs_BC/designs/LRP6/LRP_E1E2",
+    "binder_name": "LRP_E1E2",
+    "starting_pdb": "/hpf/projects/mtyers/ningrui/designs_BC/targets/8ctg.pdb",
+    "chains": "C",
+    "target_hotspot_residues": "361, 363, 379, 380, 404, 449, 465, 491, 493, 534, 550, 576",
+    "lengths": [50, 100],
+    "number_of_final_designs": 100
+}

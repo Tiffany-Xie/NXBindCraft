@@ -6,7 +6,7 @@
 #SBATCH --qos=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --mem 42gb
-#SBATCH --time 72:00:00
+#SBATCH --time 120:00:00
 #SBATCH --output=./Logs/designLogs/bindcraft_%A.log
 
 # Initialise environment and modules
@@ -52,4 +52,4 @@ python -u "${SCRIPT_DIR}/bindcraft.py" --settings "${SETTINGS}" --filters "${FIL
 LOG_PATH=$(python -c "import json; print(json.load(open('${SETTINGS}')).get('design_path', '.'))")
 
 JOB_ID=${SLURM_JOB_ID}
-mv "/hpf/projects/mtyers/ningrui/NXBindCraft/Logs/designLogs/bindcraft_${JOB_ID}.log" "${LOG_DIR}/bindcraft_${JOB_ID}.log"
+mv "/hpf/projects/mtyers/ningrui/NXBindCraft/Logs/designLogs/bindcraft_${JOB_ID}.log" "${LOG_PATH}/bindcraft_${JOB_ID}.log"
