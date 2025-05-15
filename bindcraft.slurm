@@ -6,7 +6,7 @@
 #SBATCH --qos=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --mem 42gb
-#SBATCH --time 120:00:00
+#SBATCH --time 72:00:00
 #SBATCH --output=./Logs/designLogs/bindcraft_%A.log
 
 # Initialise environment and modules

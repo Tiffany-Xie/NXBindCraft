@@ -1,6 +1,6 @@
 {
-    "design_path": "/hpf/projects/mtyers/ningrui/designs_BC/designs/FZD/FZD8_nonconserved_HS2",
-    "binder_name": "FZD8_nc_hs2",
+    "design_path": "/hpf/projects/mtyers/ningrui/designs_BC/designs/FZD/FZD8_nonconserved_HS2_force_contact",
+    "binder_name": "FZD8_nc_hs2_force_con",
     "starting_pdb": "/hpf/projects/mtyers/ningrui/designs_BC/targets/5un6.pdb",
     "chains": "A",
     "target_hotspot_residues": "6,7,25,74",
